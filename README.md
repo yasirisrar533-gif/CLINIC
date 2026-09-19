@@ -1,89 +1,106 @@
 # Dr. Yasir Israr — Orthodontics Website
 
-Single-file production website for Dr. Yasir Israr's specialist orthodontic practice in Peshawar. Theme: navy blue, black, and white.
+Single-file production website for Dr. Yasir Israr's specialist orthodontic practice in Peshawar, with a live Supabase-powered blog CMS. Theme: navy blue, black, and white.
 
 ## What you have
 
-- **`index.html`** — the entire website in one file (~370 KB). All 7 clinical/portrait images are embedded as WebP (converted from the original JPEGs for a smaller, faster-loading file). No image folder needed. Drop this single file on any static host and it works.
+- **`index.html`** — the entire website in one file. All 7 clinical/portrait images are embedded as WebP. No build step, no dependencies.
+- **`supabase-setup.sql`** — run once in your Supabase dashboard to create the posts table, RLS policies, and image storage bucket
+- **`_redirects`** — Netlify SPA fallback for clean article URLs (`/article/slug`)
 - **`sitemap.xml`** — for Google Search Console
 - **`robots.txt`** — search engine crawl instructions
-- **`README.md`** — this file
+- **`CNAME`** — custom domain pointer (`dryasirisrar.com`)
 
-That's it. No build step, no dependencies, no server.
+## Architecture
 
-## Deploy to Netlify (2 minutes)
+The website is a single static HTML file that connects to **Supabase** for:
 
-**Simplest way:**
-1. Go to https://app.netlify.com/drop
-2. Sign in (free)
-3. Drag `index.html` onto the drop zone
-4. Rename the site under **Site settings → Change site name** to something like `yasir-israr-orthodontics`
+- **Authentication** — email/password login for the admin panel
+- **PostgreSQL database** — stores all blog posts with title, body (rich text), slug, category, status, featured image URL, SEO fields, and timestamps
+- **Storage** — `blog-images` bucket for uploaded images (auto-compressed to WebP on the client)
+- **Row Level Security (RLS)** — public visitors can only read published posts; only authenticated users can create/edit/delete
 
-**If you already have a Netlify site linked to GitHub:** edit `index.html` directly on GitHub (paste new content and commit), or unlink the repo and use drag-and-drop.
+Only the Supabase **anon key** is in the frontend (safe by design — RLS enforces all access control). No service-role keys are exposed.
 
-## Contact details already filled in
+## Setup (one-time)
+
+### 1. Create a Supabase project
+
+1. Go to [supabase.com](https://supabase.com) and create a free project
+2. Note your **Project URL** and **Anon Key** from Settings → API
+
+### 2. Run the database setup
+
+1. In your Supabase dashboard, go to **SQL Editor → New Query**
+2. Paste the contents of `supabase-setup.sql` and click **Run**
+3. This creates the `posts` table, RLS policies, storage bucket, and optionally seeds two sample articles
+
+### 3. Create an admin user
+
+1. In Supabase dashboard, go to **Authentication → Users → Add user**
+2. Create a user with your email and a strong password
+3. This is the account you'll use to log in at `/#admin`
+
+### 4. Configure the website
+
+Open `index.html` and find these two lines near the top of the main `<script>` block:
+
+```javascript
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+```
+
+Replace them with your actual Supabase project URL and anon key.
+
+### 5. Deploy to Netlify
+
+1. Push the repo to GitHub (or drag-and-drop to [app.netlify.com/drop](https://app.netlify.com/drop))
+2. The `_redirects` file ensures `/article/slug` URLs work correctly
+3. Set your custom domain if desired
+
+## How to publish a new article
+
+1. Visit `yoursite.com/#admin`
+2. Sign in with your Supabase admin email and password
+3. Fill in: title, subtitle, category, content (rich text editor with headings, bold, italic, lists, links, inline images)
+4. Optionally upload a featured image (auto-compressed to WebP)
+5. Optionally configure SEO title and description
+6. Click **Publish** — the article is immediately live on the public site
+7. No code changes, no redeployment needed
+
+## Contact details
 
 - **WhatsApp / Phone:** 0317 8457772
 - **Email:** yasirisrar533@gmail.com
 - **Address:** Clinic 245, 2nd Floor, Uhad Towers, University Road, Peshawar, KPK
 - **Hours:** Monday–Saturday, 3:00 PM – 7:00 PM · Sunday closed
 
-If any of this changes, open `index.html` in a text editor and use Find & Replace — the number, email, address, and hours each appear in 2–4 places (contact section, footer, booking form script, and the SEO schema block near the top).
+If any of this changes, open `index.html` and use Find & Replace — the number, email, address, and hours each appear in 2–4 places.
 
-## Change the admin password first!
+## Site sections
 
-1. Visit `yoursite.com/#admin`
-2. Sign in with default password: **`yasir2026`**
-3. Click **Change password** and set your own
+- **Hero** — tagline with technique philosophy
+- **Process** — 3 steps: Consult → Preview → SmileWhite
+- **Who we treat** — Adults / Children / Teens / Referrals
+- **What we offer** — clear aligners, precision braces, custom MARPE, jaw surgery orthodontics
+- **Shape memory aligners** — technology spotlight
+- **The practice** — about Dr. Yasir, credentials
+- **FAQ** — 7 common patient questions
+- **Journal** — Supabase-powered blog with featured article, cards, category filtering, search, and individual article pages
+- **Booking** — WhatsApp scheduling form
+- **Contact + Footer**
 
-## Site sections (in order)
+## SEO
 
-- **Hero** — "Your perfect smile is a consultation away," with the Graphy-certification line and the biology/technology/art technique
-- **Process** — 3 steps: Consult → Preview your smile → SmileWhite
-- **Who we treat** — Adults (shape memory aligners) / Children 8–11 (interceptive & growth guidance) / Teens (braces & aligners) / Referrals
-- **What we offer** — single-row navy section: clear aligners, precision braces, custom MARPE, jaw surgery orthodontics — each opens a detail popup
-- **Shape memory aligners** — dedicated spotlight tab on the technology and stats
-- **The practice** — about Dr. Yasir, credentials, technique
-- **Signature quote** — conference photo with practice philosophy
-- **FAQ** — 7 common patient questions, including the consultation pricing policy
-- **Journal** — separate blog overlay with dropdown (Patients / Doctors & Colleagues)
-- **Booking banner** — navy CTA with the consultation pricing note and a WhatsApp booking form (name, age, gender, problem) that opens WhatsApp pre-filled with a "Schedule your consultation" button
-- **Contact** — address, hours, get-in-touch
-- **Footer**
+Each published article gets:
+- Clean URL: `/article/article-slug`
+- Dynamic `<title>` and `<meta description>`
+- Open Graph tags (title, description, image, type, URL)
+- Article structured data (Schema.org JSON-LD)
+- Publication date metadata
 
-## Consultation pricing policy shown on the site
-
-Consultations under 15 minutes are free. Longer or more detailed consultations are charged at the clinic's standard fee. This is stated in the booking banner and in the FAQ.
-
-## Managing the journal (blog)
-
-1. Go to `yoursite.com/#admin` and sign in
-2. Write posts, attach images (up to 3 MB), pick "For patients" or "For doctors & colleagues"
-3. Click Publish
-
-**Important limitation:** journal posts are stored in your browser only. Visitors won't see them until you bake them into the file. To publish for real:
-1. In the admin, click **Export JSON** — downloads all your posts
-2. Open `index.html`, search for `SEED_POSTS`, and replace the array content with your JSON
-3. Re-upload to Netlify
-
-Or upgrade to Decap CMS later (30-min setup, free) for real live publishing.
-
-## Getting found on Google
-
-The site has SEO built in (meta tags, schema markup, sitemap). To actually rank:
-
-1. **Google Business Profile** — google.com/business — sign up, verify by postcard (2 weeks). Biggest single thing you can do for local search.
-2. **Google Search Console** — search.google.com/search-console — add your domain, submit `sitemap.xml`
-3. **Custom domain** — get a `.com` or `.pk` domain (~$12/year), add it in Netlify, and update the URLs inside `sitemap.xml` and `robots.txt` to match
-4. **Ask patients for Google reviews** — reviews drive local rankings more than anything else
-5. **Publish blog posts** — every patient-facing article is a page that can rank
-
-Note: `sitemap.xml` and `robots.txt` currently point at `https://dryasirisrar.com/` as a placeholder domain. Update both files with your real domain once you have one.
+**Limitation:** Social media crawlers (Facebook, Twitter, LinkedIn) do not execute JavaScript, so Open Graph tags are set dynamically and may not be picked up by link previews. For full social sharing support, you would need server-side rendering or Supabase Edge Functions to inject meta tags before the page loads.
 
 ## Swapping images
 
-The 7 images are embedded in the file as WebP. To swap one, ask Claude in a new session — provide the new image and Claude can convert and embed it directly.
-
-## Making future changes
-
-Any change (new copy, new services, colors, sections, pricing) — drop back into a Claude session with the current `index.html` attached and describe what you want. Claude can edit the file directly.
+The 7 clinical/portrait images are embedded in the file as WebP. To swap one, ask Claude in a new session — provide the new image and Claude can convert and embed it directly.

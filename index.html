@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
 <script type="application/ld+json">
 {
@@ -817,21 +818,18 @@ img { max-width: 100%; display: block; }
   .spotlight-visual { aspect-ratio: 4/3; }
 }
 
-/* ============ JOURNAL OVERLAY ============ */
+/* ============ JOURNAL OVERLAY (redesigned) ============ */
 .journal-overlay {
   position: fixed; inset: 0; background: var(--white);
   z-index: 100; overflow-y: auto; display: none;
   animation: journalIn 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .journal-overlay.open { display: block; }
-@keyframes journalIn {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+@keyframes journalIn { from { transform: translateY(20px); opacity: 0; } }
 .journal-nav {
   position: sticky; top: 0; z-index: 5;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
   padding: 18px 40px;
   display: flex; justify-content: space-between; align-items: center;
@@ -846,141 +844,336 @@ img { max-width: 100%; display: block; }
 .journal-close:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
 .journal-header {
   max-width: var(--max); margin: 0 auto;
-  padding: 80px 40px 56px; border-bottom: 1px solid var(--line);
+  padding: 72px 40px 40px;
 }
 .journal-header .mono { color: var(--navy); margin-bottom: 20px; display: block; }
 .journal-header h1 {
   font-family: var(--display); font-weight: 400;
-  font-size: clamp(48px, 7vw, 88px); line-height: 0.98;
-  letter-spacing: -0.03em; margin-bottom: 20px;
+  font-size: clamp(40px, 5.5vw, 64px); line-height: 1.02;
+  letter-spacing: -0.03em; max-width: 800px;
 }
 .journal-header h1 em { font-style: italic; color: var(--navy); }
 .journal-header p {
-  font-size: 18px; color: var(--muted); max-width: 620px; line-height: 1.6;
+  font-size: 17px; color: var(--muted); max-width: 560px; line-height: 1.6; margin-top: 16px;
 }
 .journal-toolbar {
   max-width: var(--max); margin: 0 auto;
-  padding: 44px 40px 24px;
+  padding: 0 40px 32px;
   display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 20px;
+  flex-wrap: wrap; gap: 16px;
+  border-bottom: 1px solid var(--line);
 }
-.journal-dropdown { position: relative; }
-.dropdown-trigger {
-  background: var(--white); border: 1px solid var(--line-2);
-  border-radius: 999px; padding: 12px 20px 12px 22px;
-  font-size: 14px; font-weight: 500; color: var(--ink);
-  cursor: pointer; display: flex; align-items: center; gap: 12px;
-  font-family: var(--body); transition: all 0.2s;
-  min-width: 280px; justify-content: space-between;
+.journal-filters { display: flex; gap: 8px; }
+.journal-filter-btn {
+  padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--line-2); background: var(--white);
+  color: var(--ink-soft); cursor: pointer; font-family: var(--body); transition: all 0.2s;
 }
-.dropdown-trigger:hover { border-color: var(--ink); }
-.dropdown-arrow { transition: transform 0.2s; display: inline-block; font-size: 10px; color: var(--muted); }
-.dropdown-trigger.open .dropdown-arrow { transform: rotate(180deg); }
-.dropdown-menu {
-  position: absolute; top: calc(100% + 6px); left: 0;
-  background: var(--white); border: 1px solid var(--line-2);
-  border-radius: 8px; padding: 6px;
-  min-width: 280px; box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-  opacity: 0; visibility: hidden; transform: translateY(-8px);
-  transition: all 0.2s; z-index: 10;
+.journal-filter-btn:hover { border-color: var(--ink); }
+.journal-filter-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.journal-filter-count { font-family: var(--mono); font-size: 11px; margin-left: 6px; opacity: 0.7; }
+.journal-search { position: relative; min-width: 220px; }
+.journal-search input {
+  width: 100%; padding: 9px 14px 9px 36px;
+  border: 1px solid var(--line-2); border-radius: 999px;
+  font-family: var(--body); font-size: 14px; background: var(--white);
+  color: var(--ink); transition: border-color 0.2s;
 }
-.dropdown-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
-.dropdown-item {
-  display: flex; width: 100%; padding: 12px 16px;
-  background: none; border: none; cursor: pointer;
-  font-size: 14px; color: var(--ink-soft); text-align: left;
-  border-radius: 4px; font-family: var(--body);
-  align-items: center; justify-content: space-between; gap: 12px;
-  transition: background 0.15s;
-}
-.dropdown-item:hover { background: var(--warm); color: var(--ink); }
-.dropdown-item.active { background: var(--navy-soft); color: var(--navy); font-weight: 500; }
-.dropdown-item .count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.journal-count {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--muted);
-}
+.journal-search input:focus { outline: none; border-color: var(--navy); }
+.journal-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted-2); pointer-events: none; }
 .journal-grid {
   max-width: var(--max); margin: 0 auto;
-  padding: 32px 40px 100px;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 40px;
+  padding: 40px 40px 80px;
 }
-.post-card { cursor: pointer; transition: all 0.25s; border-top: 1px solid var(--ink); padding-top: 24px; }
-.post-card:hover { padding-top: 22px; border-top-width: 3px; }
-.post-card-image {
-  width: 100%; aspect-ratio: 16/10; object-fit: cover;
-  background: var(--warm); margin-bottom: 24px; border-radius: 3px;
-}
-.post-card-meta {
-  display: flex; gap: 12px; align-items: center;
-  color: var(--muted); margin-bottom: 14px;
-}
-.post-card-meta span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-.post-card-meta .dot { width: 3px; height: 3px; background: var(--muted); border-radius: 50%; }
-.post-card h4 {
-  font-family: var(--display); font-weight: 400;
-  font-size: 26px; line-height: 1.15; letter-spacing: -0.015em;
-  margin-bottom: 14px; color: var(--ink);
-}
-.post-card p {
-  font-size: 14px; color: var(--muted); line-height: 1.6;
-  display: -webkit-box; -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical; overflow: hidden;
-}
+.journal-loading { text-align: center; padding: 80px 0; color: var(--muted); font-size: 15px; }
 .journal-empty {
-  padding: 100px 40px; text-align: center; color: var(--muted);
-  border: 1px dashed var(--line-2); border-radius: var(--radius);
-  grid-column: 1 / -1;
+  text-align: center; padding: 100px 0; color: var(--muted); font-size: 17px;
 }
-.journal-empty p:first-child {
-  font-family: var(--display); font-size: 26px; color: var(--ink); margin-bottom: 8px;
+.journal-featured {
+  display: grid; grid-template-columns: 1.1fr 1fr;
+  gap: 48px; cursor: pointer; margin-bottom: 56px;
+  padding-bottom: 56px; border-bottom: 1px solid var(--line); align-items: center;
+}
+.journal-featured:hover h2 { color: var(--navy); }
+.journal-featured-img {
+  aspect-ratio: 16/10; overflow: hidden; border-radius: var(--radius); background: var(--warm);
+}
+.journal-featured-img img {
+  width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;
+}
+.journal-featured:hover .journal-featured-img img { transform: scale(1.03); }
+.journal-featured-content h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(28px, 3vw, 38px); line-height: 1.1;
+  letter-spacing: -0.02em; margin-top: 12px; transition: color 0.2s;
+}
+.journal-featured-subtitle, .journal-featured-excerpt {
+  font-size: 15px; color: var(--muted); line-height: 1.6; margin-top: 12px;
+}
+.journal-read-more {
+  display: inline-block; margin-top: 16px; font-size: 13px; font-weight: 500; color: var(--navy);
+}
+.journal-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+.journal-card { cursor: pointer; transition: transform 0.2s; }
+.journal-card:hover { transform: translateY(-3px); }
+.journal-card:hover h3 { color: var(--navy); }
+.journal-card-img {
+  aspect-ratio: 16/10; overflow: hidden; border-radius: var(--radius);
+  background: var(--warm); margin-bottom: 16px;
+}
+.journal-card-img img {
+  width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;
+}
+.journal-card:hover .journal-card-img img { transform: scale(1.03); }
+.journal-card-img-empty { background: var(--warm); }
+.journal-card-meta {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.journal-card-category { color: var(--navy); font-weight: 500; }
+.journal-card-body h3 {
+  font-family: var(--display); font-weight: 400;
+  font-size: 22px; line-height: 1.15; letter-spacing: -0.015em;
+  margin-bottom: 8px; transition: color 0.2s;
+}
+.journal-card-body p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* ============ ARTICLE VIEW ============ */
+#articleView { display: none; min-height: 100vh; background: var(--white); }
+.article-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+.article-loading-spinner {
+  width: 32px; height: 32px; border: 2px solid var(--line);
+  border-top-color: var(--navy); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.article-not-found { text-align: center; padding: 120px 24px; max-width: 500px; margin: 0 auto; }
+.article-not-found h2 { font-family: var(--display); font-size: 32px; margin-bottom: 12px; }
+.article-not-found p { color: var(--muted); margin-bottom: 24px; }
+.article-not-found a { color: var(--navy); font-weight: 500; }
+.article-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 40px; border-bottom: 1px solid var(--line);
+}
+.article-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-size: 18px; color: var(--ink); transition: color 0.2s;
+}
+.article-back:hover { color: var(--navy); }
+.article-nav-journal {
+  font-size: 14px; color: var(--ink-soft); background: none; border: none;
+  cursor: pointer; font-family: var(--body); transition: color 0.2s;
+}
+.article-nav-journal:hover { color: var(--navy); }
+.article-header {
+  max-width: 720px; margin: 0 auto; padding: 64px 24px 32px; text-align: center;
+}
+.article-header-meta {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  margin-bottom: 24px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.article-category-badge {
+  padding: 4px 12px; border-radius: 999px; background: var(--navy-soft); color: var(--navy); font-weight: 500;
+}
+.article-draft-badge {
+  padding: 4px 12px; border-radius: 999px; background: #FEF3CD; color: #856404; font-weight: 500;
+}
+.article-title {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(32px, 5vw, 52px); line-height: 1.08; letter-spacing: -0.025em;
+}
+.article-subtitle {
+  font-size: 19px; color: var(--muted); line-height: 1.5;
+  margin-top: 16px; max-width: 600px; margin-left: auto; margin-right: auto;
+}
+.article-author {
+  margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.article-author-name { font-weight: 500; font-size: 14px; }
+.article-author-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.article-featured-img { max-width: 900px; margin: 0 auto 40px; padding: 0 24px; }
+.article-featured-img img { width: 100%; border-radius: var(--radius); aspect-ratio: 16/9; object-fit: cover; }
+.article-body {
+  max-width: 680px; margin: 0 auto; padding: 0 24px 48px;
+  font-size: 17px; line-height: 1.75; color: var(--ink-soft);
+}
+.article-body h2 {
+  font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1.2;
+  letter-spacing: -0.015em; margin: 40px 0 16px; color: var(--ink);
+}
+.article-body h3 {
+  font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1.2;
+  margin: 32px 0 12px; color: var(--ink);
+}
+.article-body p { margin-bottom: 18px; }
+.article-body strong { color: var(--ink); font-weight: 500; }
+.article-body a { color: var(--navy); text-decoration: underline; }
+.article-body img { max-width: 100%; height: auto; border-radius: var(--radius); margin: 24px 0; }
+.article-body ul, .article-body ol { margin-bottom: 18px; padding-left: 24px; }
+.article-body li { margin-bottom: 6px; }
+.article-body blockquote {
+  border-left: 3px solid var(--navy); padding-left: 20px;
+  margin: 24px 0; color: var(--muted); font-style: italic;
+}
+.article-footer {
+  max-width: 680px; margin: 0 auto; padding: 32px 24px; border-top: 1px solid var(--line);
+}
+.article-share { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.article-share .mono { font-size: 11px; color: var(--muted); }
+.article-share-links { display: flex; gap: 12px; }
+.article-share-links a, .article-share-links button {
+  font-size: 13px; color: var(--navy); font-weight: 500;
+  background: none; border: 1px solid var(--navy); padding: 6px 14px;
+  border-radius: 999px; cursor: pointer; font-family: var(--body);
+  transition: all 0.2s; text-decoration: none;
+}
+.article-share-links a:hover, .article-share-links button:hover {
+  background: var(--navy); color: var(--white);
+}
+.article-related {
+  max-width: var(--max); margin: 0 auto; padding: 56px 40px; border-top: 1px solid var(--line);
+}
+.article-related h3 {
+  font-family: var(--display); font-weight: 400; font-size: 28px; margin-bottom: 32px;
+}
+.article-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.article-cta {
+  text-align: center; padding: 56px 24px 72px; border-top: 1px solid var(--line);
+  max-width: var(--max); margin: 0 auto;
+}
+.article-cta p {
+  font-family: var(--display); font-size: 24px; margin-bottom: 20px; color: var(--ink);
 }
 
 /* ============ ADMIN ============ */
-.admin-panel { display: none; padding: 60px 0; min-height: 100vh; background: var(--white); }
+.admin-panel { display: none; padding: 0; min-height: 100vh; background: var(--white); }
 .admin-panel.open { display: block; }
-.admin-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--line-2); }
+.admin-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 40px 40px 24px; max-width: var(--max);
+  margin: 0 auto 32px; border-bottom: 1px solid var(--line-2);
+}
 .admin-header h1 { font-family: var(--display); font-weight: 400; font-size: 44px; letter-spacing: -0.02em; }
-.admin-logout { background: none; border: 1px solid var(--line-2); padding: 8px 16px; border-radius: 999px; font-size: 12px; cursor: pointer; font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); transition: all 0.2s; }
+.admin-logout {
+  background: none; border: 1px solid var(--line-2); padding: 8px 16px;
+  border-radius: 999px; font-size: 12px; cursor: pointer;
+  font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink-soft); transition: all 0.2s;
+}
 .admin-logout:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
-.admin-grid { display: grid; grid-template-columns: 400px 1fr; gap: 48px; }
-.admin-form { background: var(--warm); padding: 36px; border-radius: var(--radius); }
-.admin-form h3 { font-family: var(--display); font-weight: 500; font-size: 22px; margin-bottom: 24px; }
+.admin-grid {
+  display: grid; grid-template-columns: 1fr 380px;
+  gap: 48px; max-width: var(--max); margin: 0 auto; padding: 0 40px 80px;
+}
+.admin-editor-panel { background: var(--warm); padding: 36px; border-radius: var(--radius); }
+.admin-editor-panel h3 { font-family: var(--display); font-weight: 500; font-size: 24px; margin-bottom: 24px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-group { margin-bottom: 20px; }
-.form-group label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
-.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--line-2); background: var(--white); font-family: var(--body); font-size: 15px; border-radius: 3px; color: var(--ink); transition: border-color 0.2s; }
+.form-group label {
+  display: block; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 8px;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--line-2);
+  background: var(--white); font-family: var(--body); font-size: 15px;
+  border-radius: 3px; color: var(--ink); transition: border-color 0.2s;
+}
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--navy); }
-.form-group textarea { resize: vertical; min-height: 200px; line-height: 1.6; }
+.form-group textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 .form-group small { display: block; color: var(--muted); font-size: 12px; margin-top: 6px; }
-.image-upload { border: 2px dashed var(--line-2); padding: 24px; text-align: center; border-radius: 3px; cursor: pointer; transition: all 0.2s; background: var(--white); }
+.image-upload {
+  display: block; border: 2px dashed var(--line-2); padding: 24px; text-align: center;
+  border-radius: 3px; cursor: pointer; transition: all 0.2s; background: var(--white);
+}
 .image-upload:hover { border-color: var(--ink); }
 .image-upload input { display: none; }
 .image-preview { max-height: 160px; margin: 12px auto 0; border-radius: 3px; }
 .upload-label { font-size: 13px; color: var(--muted); }
 .upload-label strong { color: var(--ink); font-weight: 500; }
-.btn { padding: 12px 24px; background: var(--ink); color: var(--white); border: 1px solid var(--ink); border-radius: 999px; font-family: var(--body); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.seo-details { margin-top: 20px; border: 1px solid var(--line-2); border-radius: var(--radius); }
+.seo-details summary {
+  padding: 14px 18px; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-soft); list-style: none;
+}
+.seo-details summary::-webkit-details-marker { display: none; }
+.seo-details[open] > summary { border-bottom: 1px solid var(--line-2); }
+.seo-details .form-group { padding: 0 18px; }
+.seo-details .form-group:first-of-type { padding-top: 18px; }
+.seo-details .form-group:last-of-type { padding-bottom: 18px; }
+.btn {
+  padding: 12px 24px; background: var(--ink); color: var(--white);
+  border: 1px solid var(--ink); border-radius: 999px;
+  font-family: var(--body); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
 .btn:hover { background: var(--navy); border-color: var(--navy); }
 .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--line-2); }
 .btn-secondary:hover { border-color: var(--ink); background: var(--ink); color: var(--white); }
-.btn-danger { background: transparent; color: #A32D2D; border: 1px solid rgba(163, 45, 45, 0.3); font-size: 12px; padding: 6px 12px; }
+.btn-danger {
+  background: transparent; color: #A32D2D; border: 1px solid rgba(163,45,45,0.3);
+  font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  font-family: var(--body); transition: all 0.2s;
+}
 .btn-danger:hover { background: #A32D2D; color: var(--white); border-color: #A32D2D; }
 .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-.admin-posts h3 { font-family: var(--display); font-weight: 500; font-size: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
-.admin-post-item { border: 1px solid var(--line); padding: 20px; border-radius: 3px; margin-bottom: 12px; display: grid; grid-template-columns: 60px 1fr auto; gap: 20px; align-items: center; background: var(--white); }
-.admin-post-item .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 3px; background: var(--warm); }
-.thumb-placeholder { width: 60px; height: 60px; border-radius: 3px; background: var(--warm); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
-.admin-post-info h4 { font-weight: 500; font-size: 15px; margin-bottom: 4px; }
-.admin-post-info span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.admin-post-info .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; margin-right: 8px; background: var(--navy-soft); color: var(--navy); }
-.admin-login { max-width: 420px; margin: 120px auto; padding: 48px; background: var(--warm); border-radius: var(--radius); text-align: center; }
+.admin-posts h3 {
+  font-family: var(--display); font-weight: 500; font-size: 24px;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+}
+.admin-post-item {
+  border: 1px solid var(--line); padding: 16px; border-radius: 3px;
+  margin-bottom: 10px; display: grid;
+  grid-template-columns: 48px 1fr auto; gap: 14px;
+  align-items: center; background: var(--white);
+}
+.admin-post-item .thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 3px; background: var(--warm); }
+.thumb-placeholder { width: 48px; height: 48px; border-radius: 3px; background: var(--warm); }
+.admin-post-info h4 { font-weight: 500; font-size: 14px; margin-bottom: 3px; }
+.admin-post-info span {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  margin-right: 6px; background: var(--navy-soft); color: var(--navy); font-weight: 500;
+}
+.badge-draft { background: #FEF3CD; color: #856404; }
+.admin-post-actions { display: flex; gap: 6px; }
+.admin-login {
+  max-width: 420px; margin: 120px auto; padding: 48px;
+  background: var(--warm); border-radius: var(--radius); text-align: center;
+}
 .admin-login h1 { font-family: var(--display); font-weight: 400; font-size: 34px; margin-bottom: 8px; }
 .admin-login p { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
-.admin-login input { width: 100%; padding: 14px; border: 1px solid var(--line-2); background: var(--white); border-radius: 3px; font-family: var(--body); font-size: 15px; margin-bottom: 12px; text-align: center; letter-spacing: 0.05em; }
+.admin-login input {
+  width: 100%; padding: 14px; border: 1px solid var(--line-2);
+  background: var(--white); border-radius: 3px; font-family: var(--body);
+  font-size: 15px; margin-bottom: 12px; letter-spacing: 0.02em;
+}
 .admin-login input:focus { outline: none; border-color: var(--navy); }
 .admin-login button { width: 100%; }
 .admin-login-error { color: #A32D2D; font-size: 13px; margin-top: 12px; min-height: 16px; }
-.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: var(--white); padding: 14px 24px; border-radius: 999px; font-size: 13px; font-weight: 500; z-index: 300; transition: transform 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.ql-container { min-height: 300px; font-family: var(--body); font-size: 16px; }
+.ql-editor { min-height: 300px; line-height: 1.65; }
+.ql-toolbar.ql-snow { border-color: var(--line-2) !important; border-radius: var(--radius) var(--radius) 0 0; background: var(--white); }
+.ql-container.ql-snow { border-color: var(--line-2) !important; border-radius: 0 0 var(--radius) var(--radius); background: var(--white); }
+.toast {
+  position: fixed; bottom: 32px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink); color: var(--white);
+  padding: 14px 24px; border-radius: 999px;
+  font-size: 13px; font-weight: 500; z-index: 300;
+  transition: transform 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* ============ MOBILE ============ */
@@ -1027,13 +1220,24 @@ img { max-width: 100%; display: block; }
   .modal-header h2 { font-size: 28px; }
 
   .journal-nav { padding: 14px 24px; }
-  .journal-header { padding: 60px 24px 40px; }
-  .journal-header h1 { font-size: 44px; }
-  .journal-toolbar { padding: 32px 24px 20px; }
-  .journal-grid { padding: 24px 24px 60px; grid-template-columns: 1fr; gap: 32px; }
-  .dropdown-trigger, .dropdown-menu { min-width: 220px; }
+  .journal-header { padding: 48px 24px 32px; }
+  .journal-header h1 { font-size: 36px; }
+  .journal-toolbar { padding: 0 24px 20px; flex-direction: column; align-items: stretch; }
+  .journal-search { min-width: 100%; }
+  .journal-grid { padding: 24px 24px 60px; }
+  .journal-featured { grid-template-columns: 1fr; gap: 24px; }
+  .journal-featured-content h2 { font-size: 26px; }
+  .journal-cards { grid-template-columns: 1fr; gap: 28px; }
+
+  .article-nav { padding: 14px 24px; }
+  .article-header { padding: 40px 24px 24px; }
+  .article-title { font-size: 28px; }
+  .article-related { padding: 40px 24px; }
+  .article-related-grid { grid-template-columns: 1fr; gap: 24px; }
 
   .admin-grid { grid-template-columns: 1fr; }
+  .admin-header { padding: 24px 24px 16px; }
+  .form-row-2 { grid-template-columns: 1fr; }
 
   .faq-item summary h3 { font-size: 18px; }
   .faq-body { padding-right: 0; font-size: 15px; }
@@ -1580,28 +1784,24 @@ img { max-width: 100%; display: block; }
   <div class="journal-header">
     <span class="mono">Dr. Yasir Israr · Orthodontics</span>
     <h1>Notes for patients and <em>colleagues</em>.</h1>
-    <p>Case reports, treatment guides, and clinical notes — filtered by audience. Choose your feed below.</p>
+    <p>Case reports, treatment guides, and clinical notes from the practice.</p>
   </div>
   <div class="journal-toolbar">
-    <div class="journal-dropdown">
-      <button class="dropdown-trigger" onclick="toggleDropdown(event)">
-        <span id="dropdownLabel">For patients</span>
-        <span class="dropdown-arrow">▼</span>
-      </button>
-      <div class="dropdown-menu" id="dropdownMenu">
-        <button class="dropdown-item active" data-tab="patient" onclick="selectFeed('patient')">
-          <span>For patients</span>
-          <span class="count" id="ddCountPatient">·</span>
-        </button>
-        <button class="dropdown-item" data-tab="doctor" onclick="selectFeed('doctor')">
-          <span>For doctors & colleagues</span>
-          <span class="count" id="ddCountDoctor">·</span>
-        </button>
-      </div>
+    <div class="journal-filters">
+      <button class="journal-filter-btn active" data-feed="patient" onclick="selectFeed('patient')">For Patients <span class="journal-filter-count" id="journalPatientCount">0</span></button>
+      <button class="journal-filter-btn" data-feed="doctor" onclick="selectFeed('doctor')">For Clinicians <span class="journal-filter-count" id="journalDoctorCount">0</span></button>
     </div>
-    <span class="journal-count" id="journalCount"></span>
+    <div class="journal-search">
+      <svg class="journal-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Search articles..." oninput="handleJournalSearch(this.value)" />
+    </div>
   </div>
   <div class="journal-grid" id="journalGrid"></div>
+</div>
+
+<!-- Article view -->
+<div id="articleView">
+  <div id="articleContent"></div>
 </div>
 
 <div class="admin-panel" id="adminPanel">
@@ -1609,6 +1809,9 @@ img { max-width: 100%; display: block; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -1681,270 +1884,528 @@ document.addEventListener('keydown', e => {
   }
 });
 
-const STORAGE_KEY = 'yi_clinic_posts_v1';
-const ADMIN_PASS_KEY = 'yi_clinic_admin_pass';
-const ADMIN_SESSION_KEY = 'yi_clinic_admin_session';
+/* ====== Supabase config — replace with your project values ====== */
+const SUPABASE_URL = 'https://shvaneemppxltrjvbssx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_nXRSc0sumlaimk57_ZpKbQ_00da_tUz';
 
-const SEED_POSTS = [
-  {
-    id: 1001, category: 'patient',
-    title: 'What to expect at your first orthodontic consultation',
-    body: `Your first visit at the clinic is a comprehensive consultation, not just a quick look — and it's completely free.\n\nWe start with a conversation about your concerns — what you'd like to change, how long you've been thinking about it, and any past dental treatment that matters to your case. There's no rush.\n\nRecords include intraoral photographs, an intraoral scan (no more messy impression trays for most patients), and where clinically indicated an OPG and CBCT.\n\nYou'll leave the first visit with a diagnosis, a clear treatment plan, an idea of duration, and a written estimate. If you're happy to proceed, we can usually begin planning digitally the same week. If you'd rather take some time to think about it — that's completely fine too.`,
-    image: null, date: '2025-06-15'
-  },
-  {
-    id: 1002, category: 'doctor',
-    title: 'Case notes: MARPE in a 24-year-old male with narrow maxilla',
-    body: `Adult skeletal expansion remains one of the most rewarding — and most technique-sensitive — procedures we offer. A recent case is worth a short write-up.\n\nPresentation: 24-year-old male, ANB +2°, bilateral posterior crossbite, transverse maxillary deficiency of ~7mm at the first molars, moderate anterior crowding. Nasal breathing already compromised.\n\nWe designed a custom MARPE from CBCT with four palatal miniscrews (2×11mm anterior, 2×13mm posterior) and a jackscrew centred on the midpalatal suture. Activation protocol: 0.25mm x 2/day for the first week, tapered to 0.25mm/day for weeks 2-3.\n\nMidpalatal suture opening was confirmed clinically at day 4 and radiographically at day 12. Total expansion at the jackscrew: 8.5mm. Post-expansion CBCT showed clean, parallel skeletal opening with minimal dental tipping.\n\nOne clinical pearl worth passing on: posterior miniscrew position matters more than anterior. Placing them too anteriorly is the single most common cause of asymmetric opening in the cases I have reviewed.`,
-    image: null, date: '2025-07-02'
-  }
-];
+let sb;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+catch(e) { console.warn('Supabase not configured — blog features disabled.'); }
 
-function getPosts() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) { localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_POSTS)); return SEED_POSTS; }
-  try { return JSON.parse(raw); } catch { return SEED_POSTS; }
+/* ====== Utilities ====== */
+function formatDate(iso) {
+  try { return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }); }
+  catch { return iso || ''; }
 }
-function savePosts(posts) { localStorage.setItem(STORAGE_KEY, JSON.stringify(posts)); }
-
-let currentFeed = 'patient';
-
-function openJournal() {
-  document.getElementById('journalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  window.scrollTo({ top: 0, behavior: 'instant' });
-  renderJournal();
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function closeJournal() {
-  document.getElementById('journalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  closeDropdown();
+function generateSlug(t) {
+  return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 }
-function toggleDropdown(e) {
-  e.stopPropagation();
-  const menu = document.getElementById('dropdownMenu');
-  const trigger = e.currentTarget;
-  menu.classList.toggle('open');
-  trigger.classList.toggle('open');
-}
-function closeDropdown() {
-  document.getElementById('dropdownMenu')?.classList.remove('open');
-  document.querySelector('.dropdown-trigger')?.classList.remove('open');
-}
-document.addEventListener('click', e => { if (!e.target.closest('.journal-dropdown')) closeDropdown(); });
-
-function selectFeed(feed) {
-  currentFeed = feed;
-  document.getElementById('dropdownLabel').textContent = feed === 'patient' ? 'For patients' : 'For doctors & colleagues';
-  document.querySelectorAll('.dropdown-item').forEach(el => el.classList.toggle('active', el.dataset.tab === feed));
-  closeDropdown();
-  renderJournal();
-}
-
-function formatDate(iso) { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return iso; } }
-function getExcerpt(body, n = 180) { const clean = body.replace(/\n+/g, ' ').trim(); return clean.length > n ? clean.slice(0, n).trim() + '…' : clean; }
-function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function renderJournal() {
-  const posts = getPosts();
-  const patient = posts.filter(p => p.category === 'patient');
-  const doctor = posts.filter(p => p.category === 'doctor');
-  document.getElementById('ddCountPatient').textContent = String(patient.length).padStart(2, '0');
-  document.getElementById('ddCountDoctor').textContent = String(doctor.length).padStart(2, '0');
-  const filtered = (currentFeed === 'patient' ? patient : doctor).sort((a, b) => new Date(b.date) - new Date(a.date));
-  const count = filtered.length;
-  document.getElementById('journalCount').textContent = count === 0 ? 'No entries' : `${String(count).padStart(2, '0')} ${count === 1 ? 'entry' : 'entries'}`;
-  const grid = document.getElementById('journalGrid');
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="journal-empty"><p>Nothing published here yet.</p><p style="font-size: 14px; margin-top: 8px;">${currentFeed === 'patient' ? 'Patient articles will appear here as they are added.' : 'Clinical notes will appear here as they are added.'}</p></div>`;
-    return;
-  }
-  grid.innerHTML = filtered.map(post => `
-    <article class="post-card" onclick="openPost(${post.id})">
-      ${post.image ? `<img src="${post.image}" alt="" class="post-card-image" loading="lazy" />` : ''}
-      <div class="post-card-meta">
-        <span>${currentFeed === 'patient' ? 'Patients' : 'Clinicians'}</span>
-        <span class="dot"></span>
-        <span>${formatDate(post.date)}</span>
-      </div>
-      <h4>${escapeHTML(post.title)}</h4>
-      <p>${escapeHTML(getExcerpt(post.body))}</p>
-    </article>`).join('');
-}
-
-function openPost(id) {
-  const post = getPosts().find(p => p.id === id);
-  if (!post) return;
-  document.getElementById('modalCategory').textContent = post.category === 'patient' ? 'For patients' : 'For clinicians';
-  document.getElementById('modalTitle').textContent = post.title;
-  document.getElementById('modalDate').textContent = formatDate(post.date);
-  const body = post.body.split(/\n\n+/).map(p => `<p>${escapeHTML(p).replace(/\n/g, '<br>')}</p>`).join('');
-  const img = post.image ? `<img src="${post.image}" alt="" style="width:100%;" />` : '';
-  document.getElementById('modalBody').innerHTML = img + body;
-  document.getElementById('modal').classList.add('open');
-}
-
-const DEFAULT_ADMIN_PASSWORD = 'yasir2026';
-function showAdmin(e) { if (e) e.preventDefault(); window.location.hash = 'admin'; renderAdmin(); }
-function isLoggedIn() { return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'; }
-
-function renderAdmin() {
-  document.getElementById('site-view').style.display = 'none';
-  document.getElementById('journalOverlay').classList.remove('open');
-  document.getElementById('adminPanel').classList.add('open');
-  window.scrollTo(0, 0);
-  if (!isLoggedIn()) {
-    document.getElementById('adminContent').innerHTML = `
-      <div class="admin-login">
-        <h1>Staff area</h1>
-        <p>Sign in to manage journal entries.</p>
-        <input type="password" id="adminPassInput" placeholder="Password" autocomplete="current-password" />
-        <button class="btn" onclick="tryLogin()">Sign in</button>
-        <div class="admin-login-error" id="loginError"></div>
-        <p style="margin-top: 24px; font-size: 12px;">
-          <a href="#" onclick="event.preventDefault(); exitAdmin();" style="color: var(--muted);">← Back to site</a>
-        </p>
-      </div>`;
-    setTimeout(() => {
-      const input = document.getElementById('adminPassInput');
-      input?.focus();
-      input?.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
-    }, 0);
-    return;
-  }
-  renderAdminDashboard();
-}
-function tryLogin() {
-  const val = document.getElementById('adminPassInput').value;
-  const storedPass = localStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_ADMIN_PASSWORD;
-  if (val === storedPass) { sessionStorage.setItem(ADMIN_SESSION_KEY, 'true'); renderAdmin(); }
-  else { document.getElementById('loginError').textContent = 'Wrong password.'; }
-}
-function logout() { sessionStorage.removeItem(ADMIN_SESSION_KEY); renderAdmin(); }
-function exitAdmin() {
-  document.getElementById('adminPanel').classList.remove('open');
-  document.getElementById('site-view').style.display = '';
-  window.location.hash = '';
-  document.body.style.overflow = '';
-}
-let uploadedImage = null;
-function renderAdminDashboard() {
-  const posts = getPosts().sort((a, b) => new Date(b.date) - new Date(a.date));
-  document.getElementById('adminContent').innerHTML = `
-    <div class="admin-header">
-      <div><h1>Journal editor</h1><p class="mono" style="color: var(--muted); margin-top: 8px;">Add and manage posts for patients and clinicians.</p></div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="admin-logout" onclick="exitAdmin()">← Back to site</button>
-        <button class="admin-logout" onclick="logout()">Sign out</button>
-      </div>
-    </div>
-    <div class="admin-grid">
-      <div class="admin-form">
-        <h3>New post</h3>
-        <div class="form-group"><label for="postCategory">Category</label>
-          <select id="postCategory"><option value="patient">For patients</option><option value="doctor">For doctors & colleagues</option></select>
-        </div>
-        <div class="form-group"><label for="postTitle">Title</label><input type="text" id="postTitle" placeholder="A short, specific title" /></div>
-        <div class="form-group"><label for="postBody">Content</label><textarea id="postBody" placeholder="Write the post. Separate paragraphs with a blank line."></textarea><small>Line breaks are preserved. Separate paragraphs with a blank line.</small></div>
-        <div class="form-group"><label>Featured image (optional)</label>
-          <label class="image-upload" for="postImage">
-            <div id="uploadDisplay"><div class="upload-label"><strong>Choose image</strong><br>PNG or JPG, up to 3 MB</div></div>
-            <input type="file" id="postImage" accept="image/*" onchange="handleImage(this)" />
-          </label>
-        </div>
-        <div class="form-group"><label for="postDate">Date</label><input type="date" id="postDate" value="${new Date().toISOString().slice(0, 10)}" /></div>
-        <div class="btn-row"><button class="btn" onclick="publishPost()">Publish</button><button class="btn-secondary btn" onclick="resetForm()">Clear</button></div>
-      </div>
-      <div class="admin-posts">
-        <h3>Published posts <span class="mono" style="color: var(--muted); font-size: 12px; font-weight: 400;">${posts.length} total</span></h3>
-        <div style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-secondary btn" style="font-size: 12px; padding: 8px 14px;" onclick="exportPosts()">Export JSON</button>
-          <button class="btn-secondary btn" style="font-size: 12px; padding: 8px 14px;" onclick="document.getElementById('importFile').click()">Import JSON</button>
-          <button class="btn-secondary btn" style="font-size: 12px; padding: 8px 14px;" onclick="changePassword()">Change password</button>
-          <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importPosts(this)" />
-        </div>
-        <div id="adminPostsList">
-          ${posts.length === 0 ? '<p style="color: var(--muted); padding: 20px 0;">No posts yet. Publish your first one on the left.</p>' :
-            posts.map(p => `
-              <div class="admin-post-item">
-                ${p.image ? `<img src="${p.image}" class="thumb" alt="" />` : `<div class="thumb-placeholder">NO IMG</div>`}
-                <div class="admin-post-info"><h4>${escapeHTML(p.title)}</h4><span><span class="badge">${p.category === 'patient' ? 'Patient' : 'Clinician'}</span>${formatDate(p.date)}</span></div>
-                <button class="btn-danger" onclick="deletePost(${p.id})">Delete</button>
-              </div>`).join('')}
-        </div>
-      </div>
-    </div>`;
-}
-function handleImage(input) {
-  const file = input.files[0]; if (!file) return;
-  if (file.size > 3 * 1024 * 1024) { toast('Image too large. Max 3 MB.'); input.value = ''; return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    uploadedImage = e.target.result;
-    document.getElementById('uploadDisplay').innerHTML = `<img src="${uploadedImage}" class="image-preview" alt="" /><div class="upload-label" style="margin-top: 10px;">Image ready. Click to change.</div>`;
-  };
-  reader.readAsDataURL(file);
-}
-function publishPost() {
-  const category = document.getElementById('postCategory').value;
-  const title = document.getElementById('postTitle').value.trim();
-  const body = document.getElementById('postBody').value.trim();
-  const date = document.getElementById('postDate').value;
-  if (!title) { toast('Add a title.'); return; }
-  if (!body) { toast('Add some content.'); return; }
-  const posts = getPosts();
-  posts.push({ id: Date.now(), category, title, body, image: uploadedImage, date: date || new Date().toISOString().slice(0, 10) });
-  savePosts(posts); resetForm(); renderAdminDashboard(); toast('Post published.');
-}
-function resetForm() {
-  document.getElementById('postTitle').value = '';
-  document.getElementById('postBody').value = '';
-  document.getElementById('postImage').value = '';
-  uploadedImage = null;
-  document.getElementById('uploadDisplay').innerHTML = '<div class="upload-label"><strong>Choose image</strong><br>PNG or JPG, up to 3 MB</div>';
-}
-function deletePost(id) {
-  if (!confirm('Delete this post?')) return;
-  savePosts(getPosts().filter(p => p.id !== id));
-  renderAdminDashboard(); toast('Post deleted.');
-}
-function exportPosts() {
-  const blob = new Blob([JSON.stringify(getPosts(), null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `journal-backup-${new Date().toISOString().slice(0, 10)}.json`;
-  a.click(); URL.revokeObjectURL(url); toast('Backup downloaded.');
-}
-function importPosts(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (!Array.isArray(imported)) throw new Error('Invalid');
-      if (!confirm(`Import ${imported.length} posts? This replaces all current posts.`)) return;
-      savePosts(imported); renderAdminDashboard(); toast('Posts imported.');
-    } catch { toast('Could not read that file.'); }
-  };
-  reader.readAsText(file); input.value = '';
-}
-function changePassword() {
-  const current = prompt('Current password:'); if (current === null) return;
-  const storedPass = localStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_ADMIN_PASSWORD;
-  if (current !== storedPass) { toast('Wrong password.'); return; }
-  const next = prompt('New password (at least 6 characters):');
-  if (!next || next.length < 6) { toast('Password too short.'); return; }
-  localStorage.setItem(ADMIN_PASS_KEY, next); toast('Password updated.');
+function getExcerpt(html, n) {
+  n = n || 180;
+  const d = document.createElement('div'); d.innerHTML = html;
+  const t = (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? t.slice(0, n).trim() + '…' : t;
 }
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
-if (window.location.hash === '#admin') renderAdmin();
-window.addEventListener('hashchange', () => { if (window.location.hash === '#admin') renderAdmin(); });
+
+/* ====== Image compression + upload ====== */
+function compressImage(file, maxW, q) {
+  maxW = maxW || 1400; q = q || 0.82;
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = (h * maxW) / w; w = maxW; }
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('Compression failed')), 'image/webp', q);
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function uploadImage(file) {
+  const blob = await compressImage(file);
+  const name = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.webp';
+  const { error } = await sb.storage.from('blog-images').upload(name, blob, {
+    contentType: 'image/webp', cacheControl: '31536000'
+  });
+  if (error) throw error;
+  const { data } = sb.storage.from('blog-images').getPublicUrl(name);
+  return data.publicUrl;
+}
+
+/* ====== Supabase post queries ====== */
+async function fetchPublishedPosts() {
+  if (!sb) return [];
+  const { data, error } = await sb.from('posts').select('*')
+    .eq('status', 'published').order('published_at', { ascending: false });
+  if (error) { console.error(error); return []; }
+  return data || [];
+}
+async function fetchPostBySlug(slug) {
+  if (!sb) return null;
+  const { data } = await sb.from('posts').select('*')
+    .eq('slug', slug).eq('status', 'published').maybeSingle();
+  return data;
+}
+async function fetchAllPosts() {
+  if (!sb) return [];
+  const { data, error } = await sb.from('posts').select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error(error); return []; }
+  return data || [];
+}
+async function fetchRelatedPosts(id, cat, lim) {
+  if (!sb) return [];
+  const { data } = await sb.from('posts')
+    .select('id,title,slug,excerpt,featured_image,published_at,category')
+    .eq('status', 'published').eq('category', cat).neq('id', id)
+    .order('published_at', { ascending: false }).limit(lim || 3);
+  return data || [];
+}
+async function upsertPost(post) {
+  if (post.id) {
+    const { data, error } = await sb.from('posts').update(post).eq('id', post.id).select().single();
+    if (error) throw error; return data;
+  } else {
+    const { data, error } = await sb.from('posts').insert(post).select().single();
+    if (error) throw error; return data;
+  }
+}
+async function deletePostById(id) {
+  const { error } = await sb.from('posts').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* ====== SEO meta tag injection ====== */
+const _origTitle = document.title;
+const _origDesc = (document.querySelector('meta[name="description"]') || {}).content || '';
+function setMeta(name, content) {
+  const isOG = name.startsWith('og:') || name.startsWith('article:');
+  const attr = isOG ? 'property' : 'name';
+  let el = document.querySelector('meta[' + attr + '="' + name + '"]');
+  if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
+  el.setAttribute('content', content || '');
+}
+function updateArticleMeta(p) {
+  document.title = (p.seo_title || p.title) + ' — Dr. Yasir Israr';
+  setMeta('description', p.seo_description || p.excerpt || '');
+  setMeta('og:title', p.seo_title || p.title);
+  setMeta('og:description', p.seo_description || p.excerpt || '');
+  setMeta('og:image', p.featured_image || '');
+  setMeta('og:type', 'article');
+  setMeta('og:url', location.origin + '/article/' + p.slug);
+  setMeta('article:published_time', p.published_at || '');
+  let s = document.getElementById('article-schema');
+  if (!s) { s = document.createElement('script'); s.type = 'application/ld+json'; s.id = 'article-schema'; document.head.appendChild(s); }
+  s.textContent = JSON.stringify({
+    "@context": "https://schema.org", "@type": "Article",
+    "headline": p.title,
+    "description": p.seo_description || p.excerpt || '',
+    "image": p.featured_image || undefined,
+    "datePublished": p.published_at,
+    "dateModified": p.updated_at,
+    "author": {"@type":"Person","name":"Dr. Yasir Israr","jobTitle":"Specialist Orthodontist"},
+    "publisher": {"@type":"Organization","name":"Dr. Yasir Israr — Orthodontics"},
+    "mainEntityOfPage": {"@type":"WebPage","@id": location.origin + '/article/' + p.slug}
+  });
+}
+function resetMeta() {
+  document.title = _origTitle;
+  setMeta('description', _origDesc);
+  setMeta('og:title', 'Dr. Yasir Israr — Orthodontist in Peshawar');
+  setMeta('og:description', _origDesc);
+  setMeta('og:image', ''); setMeta('og:type', 'website');
+  setMeta('og:url', location.origin);
+  const s = document.getElementById('article-schema'); if (s) s.remove();
+}
+
+/* ====== Routing ====== */
+function handleRoute() {
+  const path = location.pathname;
+  const hash = location.hash;
+  if (path.startsWith('/article/')) {
+    showArticleView(decodeURIComponent(path.slice(9)));
+  } else if (hash === '#admin') {
+    showAdminView();
+  } else {
+    showSiteView();
+    if (hash === '#journal') openJournal();
+  }
+}
+function navigateToArticle(slug) {
+  history.pushState({ article: slug }, '', '/article/' + encodeURIComponent(slug));
+  showArticleView(slug);
+  window.scrollTo(0, 0);
+}
+function navigateHome() {
+  history.pushState({}, '', '/');
+  showSiteView();
+  resetMeta();
+}
+function showSiteView() {
+  document.getElementById('site-view').style.display = '';
+  document.getElementById('articleView').style.display = 'none';
+  document.getElementById('adminPanel').classList.remove('open');
+  document.body.style.overflow = '';
+  resetMeta();
+}
+function showArticleView(slug) {
+  document.getElementById('site-view').style.display = 'none';
+  document.getElementById('adminPanel').classList.remove('open');
+  document.getElementById('articleView').style.display = 'block';
+  closeJournal();
+  renderArticle(slug);
+}
+function showAdmin(e) {
+  if (e) e.preventDefault();
+  location.hash = 'admin';
+}
+function showAdminView() {
+  document.getElementById('site-view').style.display = 'none';
+  document.getElementById('articleView').style.display = 'none';
+  document.getElementById('adminPanel').classList.add('open');
+  closeJournal();
+  renderAdmin();
+}
+window.addEventListener('popstate', handleRoute);
+window.addEventListener('hashchange', handleRoute);
+
+/* ====== Journal overlay ====== */
+let cachedPosts = [];
+let currentFeed = 'patient';
+let searchQuery = '';
+
+async function openJournal() {
+  document.getElementById('journalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (cachedPosts.length === 0) {
+    document.getElementById('journalGrid').innerHTML = '<div class="journal-loading">Loading articles…</div>';
+    cachedPosts = await fetchPublishedPosts();
+  }
+  renderJournal();
+}
+function closeJournal() {
+  document.getElementById('journalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function selectFeed(feed) {
+  currentFeed = feed;
+  document.querySelectorAll('.journal-filter-btn').forEach(el =>
+    el.classList.toggle('active', el.dataset.feed === feed)
+  );
+  renderJournal();
+}
+function handleJournalSearch(val) {
+  searchQuery = val.toLowerCase().trim();
+  renderJournal();
+}
+function renderJournal() {
+  let posts = cachedPosts.filter(p => p.category === currentFeed);
+  if (searchQuery) {
+    posts = posts.filter(p =>
+      p.title.toLowerCase().includes(searchQuery) ||
+      (p.excerpt || '').toLowerCase().includes(searchQuery) ||
+      (p.subtitle || '').toLowerCase().includes(searchQuery)
+    );
+  }
+  const pc = cachedPosts.filter(p => p.category === 'patient').length;
+  const dc = cachedPosts.filter(p => p.category === 'doctor').length;
+  document.getElementById('journalPatientCount').textContent = pc;
+  document.getElementById('journalDoctorCount').textContent = dc;
+  const grid = document.getElementById('journalGrid');
+  if (posts.length === 0) {
+    grid.innerHTML = '<div class="journal-empty"><p>' +
+      (searchQuery ? 'No articles match your search.' : 'No articles published yet.') + '</p></div>';
+    return;
+  }
+  const featured = posts[0];
+  const rest = posts.slice(1);
+  let html = '<article class="journal-featured" onclick="navigateToArticle(\'' + escapeHTML(featured.slug) + '\')">' +
+    (featured.featured_image ? '<div class="journal-featured-img"><img src="' + escapeHTML(featured.featured_image) + '" alt="" loading="lazy" /></div>' : '') +
+    '<div class="journal-featured-content">' +
+    '<div class="journal-card-meta"><span class="journal-card-category">' + (currentFeed === 'patient' ? 'For Patients' : 'For Clinicians') + '</span><span>' + formatDate(featured.published_at) + '</span></div>' +
+    '<h2>' + escapeHTML(featured.title) + '</h2>' +
+    (featured.subtitle ? '<p class="journal-featured-subtitle">' + escapeHTML(featured.subtitle) + '</p>' : '') +
+    '<p class="journal-featured-excerpt">' + escapeHTML(featured.excerpt || getExcerpt(featured.body)) + '</p>' +
+    '<span class="journal-read-more">Read article →</span>' +
+    '</div></article>';
+  if (rest.length > 0) {
+    html += '<div class="journal-cards">';
+    rest.forEach(function(post) {
+      html += '<article class="journal-card" onclick="navigateToArticle(\'' + escapeHTML(post.slug) + '\')">' +
+        (post.featured_image ? '<div class="journal-card-img"><img src="' + escapeHTML(post.featured_image) + '" alt="" loading="lazy" /></div>' : '<div class="journal-card-img journal-card-img-empty"></div>') +
+        '<div class="journal-card-body"><div class="journal-card-meta"><span class="journal-card-category">' + (post.category === 'patient' ? 'For Patients' : 'For Clinicians') + '</span><span>' + formatDate(post.published_at) + '</span></div>' +
+        '<h3>' + escapeHTML(post.title) + '</h3>' +
+        '<p>' + escapeHTML(post.excerpt || getExcerpt(post.body)) + '</p></div></article>';
+    });
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+/* ====== Article view ====== */
+async function renderArticle(slug) {
+  const c = document.getElementById('articleContent');
+  c.innerHTML = '<div class="article-loading"><div class="article-loading-spinner"></div></div>';
+  let post;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data } = await sb.from('posts').select('*').eq('slug', slug).maybeSingle();
+      post = data;
+    } else {
+      post = await fetchPostBySlug(slug);
+    }
+  } catch(e) { post = await fetchPostBySlug(slug); }
+  if (!post) {
+    c.innerHTML = '<div class="article-not-found"><h2>Article not found</h2><p>This article may have been removed or the URL is incorrect.</p><a href="/" onclick="event.preventDefault(); navigateHome();">← Back to site</a></div>';
+    return;
+  }
+  updateArticleMeta(post);
+  const related = await fetchRelatedPosts(post.id, post.category);
+  let rhtml = '';
+  if (related.length > 0) {
+    rhtml = '<section class="article-related"><h3>Related articles</h3><div class="article-related-grid">';
+    related.forEach(function(r) {
+      rhtml += '<article class="journal-card" onclick="navigateToArticle(\'' + escapeHTML(r.slug) + '\')">' +
+        (r.featured_image ? '<div class="journal-card-img"><img src="' + escapeHTML(r.featured_image) + '" alt="" loading="lazy" /></div>' : '<div class="journal-card-img journal-card-img-empty"></div>') +
+        '<div class="journal-card-body"><div class="journal-card-meta"><span class="journal-card-category">' + (r.category === 'patient' ? 'For Patients' : 'For Clinicians') + '</span><span>' + formatDate(r.published_at) + '</span></div>' +
+        '<h3>' + escapeHTML(r.title) + '</h3><p>' + escapeHTML(r.excerpt || '') + '</p></div></article>';
+    });
+    rhtml += '</div></section>';
+  }
+  c.innerHTML =
+    '<nav class="article-nav">' +
+      '<a href="/" onclick="event.preventDefault(); navigateHome();" class="article-back">' +
+        '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Dr. Yasir Israr</a>' +
+      '<button class="article-nav-journal" onclick="navigateHome(); setTimeout(openJournal, 100);">Open Journal</button>' +
+    '</nav>' +
+    '<header class="article-header">' +
+      '<div class="article-header-meta">' +
+        '<span class="article-category-badge">' + (post.category === 'patient' ? 'For Patients' : 'For Doctors & Colleagues') + '</span>' +
+        '<span class="article-date">' + formatDate(post.published_at) + '</span>' +
+        (post.status === 'draft' ? '<span class="article-draft-badge">Draft</span>' : '') +
+      '</div>' +
+      '<h1 class="article-title">' + escapeHTML(post.title) + '</h1>' +
+      (post.subtitle ? '<p class="article-subtitle">' + escapeHTML(post.subtitle) + '</p>' : '') +
+      '<div class="article-author"><span class="article-author-name">Dr. Yasir Israr</span><span class="article-author-title">Specialist Orthodontist</span></div>' +
+    '</header>' +
+    (post.featured_image ? '<figure class="article-featured-img"><img src="' + escapeHTML(post.featured_image) + '" alt="" /></figure>' : '') +
+    '<div class="article-body">' + post.body + '</div>' +
+    '<footer class="article-footer"><div class="article-share"><span class="mono">Share this article</span><div class="article-share-links">' +
+      '<a href="https://wa.me/?text=' + encodeURIComponent(post.title + ' — ' + location.href) + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<button onclick="navigator.clipboard.writeText(location.href); toast(\'Link copied.\');">Copy link</button>' +
+    '</div></div></footer>' +
+    rhtml +
+    '<div class="article-cta"><p style="font-family: var(--display); font-size: 24px; margin-bottom: 20px;">Ready to transform your smile?</p>' +
+      '<a href="/" onclick="event.preventDefault(); navigateHome(); setTimeout(function(){document.getElementById(\'book\').scrollIntoView({behavior:\'smooth\'});},150);" class="hero-cta" style="display:inline-flex;">' +
+        '<span>Book a consultation</span>' +
+        '<svg class="hero-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>';
+}
+
+/* ====== Admin panel ====== */
+let quillEditor = null;
+let editingPostId = null;
+let adminFeaturedImage = '';
+
+async function renderAdmin() {
+  window.scrollTo(0, 0);
+  if (!sb) { document.getElementById('adminContent').innerHTML = '<div class="admin-login"><h1>Blog not configured</h1><p>Set SUPABASE_URL and SUPABASE_ANON_KEY in index.html.</p></div>'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { renderAdminLogin(); } else { renderAdminDashboard(); }
+}
+function renderAdminLogin() {
+  document.getElementById('adminContent').innerHTML =
+    '<div class="admin-login">' +
+      '<h1>Staff area</h1>' +
+      '<p>Sign in with your admin account to manage journal entries.</p>' +
+      '<input type="email" id="adminEmail" placeholder="Email address" autocomplete="email" />' +
+      '<input type="password" id="adminPass" placeholder="Password" autocomplete="current-password" />' +
+      '<button class="btn" onclick="attemptLogin()">Sign in</button>' +
+      '<div class="admin-login-error" id="loginError"></div>' +
+      '<p style="margin-top: 24px; font-size: 12px;"><a href="#" onclick="event.preventDefault(); exitAdmin();" style="color: var(--muted);">← Back to site</a></p>' +
+    '</div>';
+  setTimeout(function() {
+    var e = document.getElementById('adminEmail'); if(e) e.focus();
+    var p = document.getElementById('adminPass');
+    if(p) p.addEventListener('keydown', function(ev) { if(ev.key==='Enter') attemptLogin(); });
+  }, 0);
+}
+async function attemptLogin() {
+  const email = document.getElementById('adminEmail').value.trim();
+  const pw = document.getElementById('adminPass').value;
+  const err = document.getElementById('loginError');
+  if (!email || !pw) { err.textContent = 'Enter email and password.'; return; }
+  err.textContent = 'Signing in…';
+  const { error } = await sb.auth.signInWithPassword({ email: email, password: pw });
+  if (error) { err.textContent = error.message || 'Invalid credentials.'; }
+  else { renderAdminDashboard(); }
+}
+async function adminLogout() { await sb.auth.signOut(); renderAdmin(); }
+function exitAdmin() { location.hash = ''; showSiteView(); }
+
+async function renderAdminDashboard() {
+  const posts = await fetchAllPosts();
+  editingPostId = null; adminFeaturedImage = '';
+  const now = new Date().toISOString().slice(0, 16);
+  document.getElementById('adminContent').innerHTML =
+    '<div class="admin-header"><div><h1>Journal editor</h1><p class="mono" style="color:var(--muted);margin-top:8px;">Create and manage articles.</p></div>' +
+    '<div style="display:flex;gap:8px;align-items:center;"><button class="admin-logout" onclick="exitAdmin()">← Back to site</button><button class="admin-logout" onclick="adminLogout()">Sign out</button></div></div>' +
+    '<div class="admin-grid"><div class="admin-editor-panel"><h3 id="editorTitle">New article</h3><div class="admin-editor-fields">' +
+      '<div class="form-row-2"><div class="form-group"><label for="postTitle">Title *</label><input type="text" id="postTitle" placeholder="Article title" oninput="autoSlug()" /></div>' +
+      '<div class="form-group"><label for="postSlug">URL slug *</label><input type="text" id="postSlug" placeholder="article-url-slug" /></div></div>' +
+      '<div class="form-group"><label for="postSubtitle">Subtitle / excerpt</label><input type="text" id="postSubtitle" placeholder="A brief summary or subtitle" /></div>' +
+      '<div class="form-row-2"><div class="form-group"><label for="postCategory">Category</label><select id="postCategory"><option value="patient">For Patients</option><option value="doctor">For Doctors & Colleagues</option></select></div>' +
+      '<div class="form-group"><label for="postStatus">Status</label><select id="postStatus"><option value="draft">Draft</option><option value="published">Published</option></select></div></div>' +
+      '<div class="form-group"><label>Featured image</label><label class="image-upload" for="featuredImageInput"><div id="featuredImageDisplay"><div class="upload-label"><strong>Choose image</strong><br>Compressed to WebP automatically</div></div><input type="file" id="featuredImageInput" accept="image/*" onchange="handleFeaturedImage(this)" /></label></div>' +
+      '<div class="form-group"><label>Content *</label><div id="quillEditor"></div></div>' +
+      '<details class="seo-details"><summary>SEO settings</summary>' +
+        '<div class="form-group"><label for="seoTitle">SEO title</label><input type="text" id="seoTitle" placeholder="Custom title for search engines" /></div>' +
+        '<div class="form-group"><label for="seoDescription">SEO description</label><textarea id="seoDescription" placeholder="Custom description for search results" style="min-height:80px;"></textarea></div>' +
+        '<div class="form-group"><label for="postDate">Publication date</label><input type="datetime-local" id="postDate" value="' + now + '" /></div>' +
+      '</details>' +
+      '<div class="btn-row" style="margin-top:20px;"><button class="btn" onclick="savePost(\'published\')">Publish</button><button class="btn-secondary btn" onclick="savePost(\'draft\')">Save draft</button><button class="btn-secondary btn" onclick="previewPost()">Preview</button><button class="btn-secondary btn" onclick="cancelEdit()">Cancel</button></div>' +
+    '</div></div>' +
+    '<div class="admin-posts"><h3>All articles <span class="mono" style="color:var(--muted);font-size:12px;font-weight:400;">' + posts.length + ' total</span></h3>' +
+    '<div id="adminPostsList">' +
+      (posts.length === 0 ? '<p style="color:var(--muted);padding:20px 0;">No articles yet.</p>' :
+        posts.map(function(p) {
+          return '<div class="admin-post-item">' +
+            (p.featured_image ? '<img src="' + escapeHTML(p.featured_image) + '" class="thumb" alt="" />' : '<div class="thumb-placeholder"></div>') +
+            '<div class="admin-post-info"><h4>' + escapeHTML(p.title) + '</h4><span><span class="badge' + (p.status==='draft'?' badge-draft':'') + '">' +
+              (p.status==='draft' ? 'Draft' : (p.category==='patient' ? 'Patient' : 'Clinician')) +
+            '</span>' + formatDate(p.published_at || p.created_at) + '</span></div>' +
+            '<div class="admin-post-actions"><button class="btn-secondary btn" style="font-size:12px;padding:6px 12px;" onclick="editPost(\'' + p.id + '\')">Edit</button>' +
+            '<button class="btn-danger" onclick="confirmDeletePost(\'' + p.id + '\')">Delete</button></div></div>';
+        }).join('')) +
+    '</div></div></div>';
+  initQuillEditor();
+}
+
+function initQuillEditor() {
+  quillEditor = new Quill('#quillEditor', {
+    theme: 'snow',
+    placeholder: 'Write your article…',
+    modules: {
+      toolbar: {
+        container: [[{header:[2,3,false]}],['bold','italic'],[{list:'ordered'},{list:'bullet'}],['link','image'],['clean']],
+        handlers: { image: quillImageHandler }
+      }
+    }
+  });
+}
+function quillImageHandler() {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.click();
+  inp.onchange = async function() {
+    var f = inp.files[0]; if (!f) return;
+    toast('Uploading image…');
+    try {
+      var url = await uploadImage(f);
+      var range = quillEditor.getSelection(true);
+      quillEditor.insertEmbed(range.index, 'image', url);
+      quillEditor.setSelection(range.index + 1);
+      toast('Image inserted.');
+    } catch(e) { toast('Upload failed: ' + e.message); }
+  };
+}
+function autoSlug() {
+  if (editingPostId) return;
+  document.getElementById('postSlug').value = generateSlug(document.getElementById('postTitle').value);
+}
+async function handleFeaturedImage(input) {
+  var f = input.files[0]; if (!f) return;
+  toast('Uploading featured image…');
+  try {
+    var url = await uploadImage(f);
+    adminFeaturedImage = url;
+    document.getElementById('featuredImageDisplay').innerHTML = '<img src="' + url + '" class="image-preview" alt="" /><div class="upload-label" style="margin-top:10px;">Uploaded. Click to change.</div>';
+    toast('Featured image uploaded.');
+  } catch(e) { toast('Upload failed: ' + e.message); }
+}
+async function savePost(status) {
+  var title = document.getElementById('postTitle').value.trim();
+  var slug = document.getElementById('postSlug').value.trim();
+  var subtitle = document.getElementById('postSubtitle').value.trim();
+  var category = document.getElementById('postCategory').value;
+  var body = quillEditor.root.innerHTML;
+  var seoTitle = document.getElementById('seoTitle').value.trim();
+  var seoDesc = document.getElementById('seoDescription').value.trim();
+  var dateVal = document.getElementById('postDate').value;
+  if (!title) { toast('Add a title.'); return; }
+  if (!slug) { toast('Add a URL slug.'); return; }
+  if (quillEditor.getText().trim().length < 2) { toast('Add some content.'); return; }
+  var postData = {
+    title: title, slug: slug, subtitle: subtitle,
+    excerpt: subtitle || getExcerpt(body, 200),
+    category: category,
+    status: status || document.getElementById('postStatus').value,
+    body: body,
+    featured_image: adminFeaturedImage || '',
+    seo_title: seoTitle, seo_description: seoDesc,
+    published_at: (status === 'published')
+      ? (dateVal ? new Date(dateVal).toISOString() : new Date().toISOString())
+      : (dateVal ? new Date(dateVal).toISOString() : null)
+  };
+  if (editingPostId) postData.id = editingPostId;
+  try {
+    await upsertPost(postData);
+    cachedPosts = [];
+    toast(status === 'published' ? 'Article published!' : 'Draft saved.');
+    renderAdminDashboard();
+  } catch(e) { toast('Error: ' + (e.message || 'Could not save.')); console.error(e); }
+}
+async function editPost(id) {
+  var posts = await fetchAllPosts();
+  var post = posts.find(function(p){ return p.id === id; });
+  if (!post) { toast('Post not found.'); return; }
+  editingPostId = id;
+  adminFeaturedImage = post.featured_image || '';
+  document.getElementById('editorTitle').textContent = 'Edit article';
+  document.getElementById('postTitle').value = post.title;
+  document.getElementById('postSlug').value = post.slug;
+  document.getElementById('postSubtitle').value = post.subtitle || '';
+  document.getElementById('postCategory').value = post.category;
+  document.getElementById('postStatus').value = post.status;
+  document.getElementById('seoTitle').value = post.seo_title || '';
+  document.getElementById('seoDescription').value = post.seo_description || '';
+  if (post.published_at) {
+    document.getElementById('postDate').value = new Date(post.published_at).toISOString().slice(0, 16);
+  }
+  if (post.featured_image) {
+    document.getElementById('featuredImageDisplay').innerHTML = '<img src="' + escapeHTML(post.featured_image) + '" class="image-preview" alt="" /><div class="upload-label" style="margin-top:10px;">Current image. Click to change.</div>';
+  }
+  quillEditor.root.innerHTML = post.body || '';
+  document.querySelector('.admin-editor-panel').scrollIntoView({ behavior: 'smooth' });
+  toast('Editing: ' + post.title);
+}
+async function confirmDeletePost(id) {
+  if (!confirm('Delete this article permanently?')) return;
+  try { await deletePostById(id); cachedPosts = []; toast('Article deleted.'); renderAdminDashboard(); }
+  catch(e) { toast('Error: ' + e.message); }
+}
+function cancelEdit() { editingPostId = null; adminFeaturedImage = ''; renderAdminDashboard(); }
+function previewPost() {
+  var slug = document.getElementById('postSlug').value.trim();
+  if (!slug) { toast('Add a slug first.'); return; }
+  window.open('/article/' + encodeURIComponent(slug), '_blank');
+}
+
+/* ====== Init ====== */
+handleRoute();
 </script>
 </body>
 </html>
